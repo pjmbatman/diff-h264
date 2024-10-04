@@ -1,12 +1,3 @@
-```markdown
-# H264CompressorNet
-
-## conda 환경 설정
-
-```bash
-conda activate h264
-```
-
 ## H264CompressorNet 개요
 
 H264CompressorNet은 Conv3d 레이어 3개로 이루어진 encoder와 ConvTranspose3d 레이어 3개로 이루어진 decoder로 구성된 autoencoder 구조를 가진 영상 압축 신경망입니다.
