@@ -76,6 +76,14 @@ resize = 256
 ```bash
 python eval.py
 ```
+## Comparison of Metrics
+
+| Metric         | SSIM  | PSNR  | LPIPS | L-inf |
+|----------------|-------|-------|-------|-------|
+| GT vs ffmpeg   | 0.96  | 38.52 | 0.10  | 41.56 |
+| GT vs Ours     | 0.94  | 38.83 | 0.09  | 36.19 |
+| ffmpeg vs Ours | 0.93  | 37.20 | 0.12  | 44.31 |
+
 
 ### Evaluation Configuration:
 
