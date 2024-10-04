@@ -1,21 +1,21 @@
-## H264CompressorNet 개요
+## H264CompressorNet Overview
 
-H264CompressorNet은 Conv3d 레이어 3개로 이루어진 encoder와 ConvTranspose3d 레이어 3개로 이루어진 decoder로 구성된 autoencoder 구조를 가진 영상 압축 신경망입니다.
+H264CompressorNet is an autoencoder-based video compression neural network consisting of three Conv3d layers in the encoder and three ConvTranspose3d layers in the decoder.
 
-- **H264CompressorNet**: Conv3d 레이어 기반의 encoder와 ConvTranspose3d 레이어 기반의 decoder로 구성된 신경망
-- **H264Loss**: mse + lpips
-- **VideoDataset**: 데이터로더 클래스
+- **H264CompressorNet**: A neural network composed of Conv3d layers for the encoder and ConvTranspose3d layers for the decoder.
+- **H264Loss**: Combination of mse (mean squared error) and lpips (Learned Perceptual Image Patch Similarity).
+- **VideoDataset**: A custom DataLoader class for loading video datasets.
 
 ## H264 Dataset Preparation
 
-- **Input dataset**: webvid
-- **Target dataset**: webvid를 ffmpeg로 압축한 데이터
+- **Input dataset**: WebVid
+- **Target dataset**: WebVid compressed using ffmpeg
 
 ```bash
 python original_h264.py
 ```
 
-- 실행하면 `webvid/train` 경로의 비디오를 ffmpeg로 h264 압축시켜 `webvid/target` 경로에 타겟 데이터셋을 저장합니다.
+- Running this script will compress all videos in the `webvid/train` directory using ffmpeg's H264 compression and store the results in the `webvid/target` directory as the target dataset.
 
 ## H264 Training
 
@@ -23,16 +23,16 @@ python original_h264.py
 python h264_train.py
 ```
 
-### Training 예시 결과:
+### Training Example Results:
 
-|  | **batch size** | **frame_size** | **train dataset** | **training time per epoch** | **total loss (lpips + mse)** | **vram** |
+|  | **Batch Size** | **Frame Size** | **Train Dataset** | **Training Time per Epoch** | **Total Loss (lpips + mse)** | **VRAM Usage** |
 | --- | --- | --- | --- | --- | --- | --- |
-| Ours | 8 | 8 | webvid 10000 | 1h | 0.01 (took only 10min) | 22GB taken |
+| Ours | 8 | 8 | WebVid 10000 | 1h | 0.01 (took only 10min) | 22GB |
 
-### Training 설정:
+### Training Configuration:
 
 ```python
-# Default 설정 예시
+# Default configuration
 input_dir = 'dataset/webvid/train'
 gt_dir = 'dataset/webvid/target'
 criterion = H264Loss().to(device)
@@ -41,12 +41,12 @@ batch_size = 8
 epochs = 20 
 ```
 
-- **input_dir**: 입력 비디오 경로
-- **gt_dir**: ffmpeg로 압축된 타겟 비디오 경로
+- **input_dir**: Path to the input video directory.
+- **gt_dir**: Path to the ffmpeg-compressed target video directory.
 - **loss**: mse + lpips
-- **batch_size**: 배치 사이즈
-- **epochs**: 에포크
-- **resize**: 해상도 (diff_h264.py의 `VideoDataset` 클래스에서 수정 가능)
+- **batch_size**: Batch size for training.
+- **epochs**: Number of epochs.
+- **resize**: Resolution (adjustable in the `VideoDataset` class in `diff_h264.py`).
 
 ## H264 Inference
 
@@ -54,7 +54,7 @@ epochs = 20
 python h264_inference.py
 ```
 
-### Inference 설정:
+### Inference Configuration:
 
 ```python
 input_dir = 'input_video'
@@ -67,9 +67,9 @@ max_frames = 16
 resize = 256
 ```
 
-- **input_dir**: 입력 비디오 경로
-- **output_dir**: 압축된 출력 비디오 경로
-- **gt_dir**: Ground Truth (원본) 비디오 경로
+- **input_dir**: Path to the input video directory.
+- **output_dir**: Path to the compressed output video directory.
+- **gt_dir**: Path to the Ground Truth (uncompressed) video directory.
 
 ## Evaluation
 
@@ -77,7 +77,7 @@ resize = 256
 python eval.py
 ```
 
-### Evaluation 설정:
+### Evaluation Configuration:
 
 ```python
 gt_video_dir = "compressed_output/uncompressed_video"
@@ -85,8 +85,8 @@ compare_video_dir = "compressed_output/compressed_video"
 get_video_metric(gt_video_dir, compare_video_dir)
 ```
 
-- **gt_video_dir**: 원본 비디오 경로
-- **compare_video_dir**: 비교할 비디오 경로
+- **gt_video_dir**: Path to the Ground Truth video directory.
+- **compare_video_dir**: Path to the video to be compared.
 
 ## Attack Types
 
@@ -94,10 +94,10 @@ get_video_metric(gt_video_dir, compare_video_dir)
 python attack.py
 ```
 
-- **ImageAugmentor** 클래스의 augmentations 파이프라인에서 공격(attack)들을 추가/제거/수정할 수 있습니다.
-- 학습된 H264 모델도 파이프라인에 추가 가능합니다.
+- In the **ImageAugmentor** class, you can add, remove, or modify attack methods in the augmentations pipeline.
+- The trained H264 model has also been added to the pipeline for attacks.
 
-### Attack 설정 예시:
+### Attack Configuration Example:
 
 ```python
 K.ColorJiggle(brightness=0.0, contrast=0.0, saturation=0.0, hue=0.0, same_on_batch=False, p=1.0, keepdim=False),
@@ -106,10 +106,10 @@ K.RandomHorizontalFlip(p=0.5, p_batch=1.0, same_on_batch=False, keepdim=False),
 H264CompressorNet()
 ```
 
-- **self.apply_augmentation**: 모든 공격을 적용
-- **self.apply_random_augmentation**: 랜덤으로 하나의 공격 적용
-- **self.apply_all_augmentations**: 모든 공격을 개별적으로 적용 후 저장
-- **self.check_differentitable**: 공격 적용 후에도 그라디언트가 흐르는지 확인
+- **self.apply_augmentation**: Apply all attacks (each attack’s probability can be adjusted via the `p` parameter).
+- **self.apply_random_augmentation**: Apply one randomly selected attack from the list (set `p=1` for all to ensure randomness).
+- **self.apply_all_augmentations**: Apply each attack one by one and save the results to the `all_attacked` folder (for visualization).
+- **self.check_differentitable**: Check if the gradient still flows after applying the augmentations.
 
 ## Attack Inference
 
@@ -117,10 +117,10 @@ H264CompressorNet()
 python attack_inference.py
 ```
 
-### Attack Inference 설정:
+### Attack Inference Configuration:
 
 ```python
-# Default 설정 예시
+# Default configuration
 input_dir = 'input_video'
 output_dir = 'attacked_video'
 gt_dir = "gt_video"
@@ -131,7 +131,7 @@ max_frames = 16
 resize = 256
 ```
 
-- **input_dir**: 입력 비디오 경로
-- **output_dir**: 공격된 출력 비디오 경로
-- **gt_dir**: Ground Truth 비디오 경로
+- **input_dir**: Path to the input video directory.
+- **output_dir**: Path to the attacked video output directory.
+- **gt_dir**: Path to the Ground Truth video directory.
 ```
